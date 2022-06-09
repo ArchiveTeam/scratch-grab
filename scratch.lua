@@ -79,6 +79,7 @@ processed = function(url)
 end
 
 discover_item = function(target, item)
+print('queuing' , item)
   if not target[item] then
     target[item] = true
   end
@@ -250,10 +251,12 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       check("https://uploads.scratch.mit.edu/projects/thumbnails/" .. item_value .. ".png")
       check("https://scratch.mit.edu/projects/" .. item_value .. "/")
       check("https://api.scratch.mit.edu/projects/" .. item_value)
-      for s in string.gmatch(html, md5_hash) do
-        discover_item(discovered_items, "a:" .. s)
+      if string.match(html, "^%s*{") then
+        for s in string.gmatch(html, md5_hash) do
+          discover_item(discovered_items, "a:" .. s)
+        end
+        queue_assets(JSON:decode(html))
       end
-      queue_assets(JSON:decode(html))
     end
     if string.match(url, "^https?://api%.scratch%.mit%.edu/projects/[0-9]+$") then
       local json = JSON:decode(html)
